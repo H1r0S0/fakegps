@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>html,body,#map{margin:0;height:100%;width:100%}</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  var start = [30.2135, -93.2044];
+  try {
+    var p = Android.initial().split(',');
+    var a = parseFloat(p[0]), b = parseFloat(p[1]);
+    if (!isNaN(a) && !isNaN(b)) start = [a, b];
+  } catch (e) {}
+
+  var map = L.map('map', { zoomControl: true }).setView(start, 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  var marker = L.marker(start, { draggable: true }).addTo(map);
+
+  function report(ll) { try { Android.onPick(ll.lat, ll.lng); } catch (e) {} }
+
+  map.on('click', function (e) { marker.setLatLng(e.latlng); report(e.latlng); });
+  marker.on('dragend', function () { report(marker.getLatLng()); });
+
+  function setPoint(lat, lon, pan) {
+    marker.setLatLng([lat, lon]);
+    if (pan) map.setView([lat, lon], map.getZoom());
+  }
+</script>
+</body>
+</html>
